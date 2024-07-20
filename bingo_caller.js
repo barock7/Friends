@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 clearInterval(countdownInterval);
             }
-        }, 1500);
+        }, 1000);
     }
 
     function endGame() {
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startCallingNumbers() {
-        const interval = parseInt(intervalSelect.value) * 1500;
+        const interval = parseInt(intervalSelect.value) * 1000;
         callNumber();
         intervalId = setInterval(() => {
             if (!paused) callNumber();
