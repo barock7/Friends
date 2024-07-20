@@ -1,6 +1,6 @@
 function playRecordedAudio(letter, number) {
     // Base URL for the audio files on your GitHub repository
-    const baseURL = 'https://https://github.com/barock7/Friends/main/audio-clips/';
+    const baseURL = 'https://https://github.com/barock7/Friends/tree/main/audio-clips/';
 
     // Construct the URL for the letter audio file
     const audioLetterURL = `${baseURL}/${letter}.mp3`;
