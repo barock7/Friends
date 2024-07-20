@@ -2,6 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const boardSelectContainer = document.getElementById('board-select-container');
     const betAmountInput = document.getElementById('bet-amount');
 
+    // Retrieve the most recently used bet amount from localStorage
+    const savedBetAmount = localStorage.getItem('bet_amount');
+    if (savedBetAmount) {
+        betAmountInput.value = savedBetAmount;
+    }
+
     function seedRandom(seed) {
         let m = 0x80000000;
         let a = 1103515245;
@@ -96,11 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
 document.getElementById('indexForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const betAmount = document.getElementById('betAmount').value;
-            const totalPlayers = document.getElementById('totalPlayers').value;
-            localStorage.setItem('betAmount', betAmount);
-            localStorage.setItem('totalPlayers', totalPlayers);
-            window.location.href = 'bingo_caller.html';
-        });
+    event.preventDefault();
+    const betAmount = document.getElementById('betAmount').value;
+    const totalPlayers = document.getElementById('totalPlayers').value;
+    localStorage.setItem('betAmount', betAmount);
+    localStorage.setItem('totalPlayers', totalPlayers);
+    window.location.href = 'bingo_caller.html';
+});
