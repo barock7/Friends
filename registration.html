@@ -3,74 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Branch Registration</title>
-    <link rel="stylesheet" href="registration.css">
+    <title>Branch Sign-In</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h2>Register Your Branch</h2>
-        <form id="registrationForm">
-            <label for="branchName">Branch Name:</label>
-            <input type="text" id="branchName" name="branchName" required>
-            
+        <h2 id="formTitle">Sign In</h2>
+        <form id="authForm">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             
-            <button type="submit">Register</button>
+            <button type="submit" id="authButton">Sign In</button>
         </form>
         <div id="loading" class="loading-indicator" style="display: none;">Loading...</div>
+        <p id="toggleForm">Don't have an account? <a href="#" id="toggleLink">Register here</a></p>
     </div>
-    
+
     <script type="module">
       // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+      import { initializeApp } from "firebase/app";
+      import { getAnalytics } from "firebase/analytics";
+      import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+      
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDc287mmdbcyEnrTgeUsa7DIuglUD_fJqQ",
+        authDomain: "friendsbingo-548cc.firebaseapp.com",
+        projectId: "friendsbingo-548cc",
+        storageBucket: "friendsbingo-548cc.appspot.com",
+        messagingSenderId: "1017184172373",
+        appId: "1:1017184172373:web:769fd888b0dc9b25eb57dc",
+        measurementId: "G-FHPVZC9L19"
+      };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDc287mmdbcyEnrTgeUsa7DIuglUD_fJqQ",
-  authDomain: "friendsbingo-548cc.firebaseapp.com",
-  projectId: "friendsbingo-548cc",
-  storageBucket: "friendsbingo-548cc.appspot.com",
-  messagingSenderId: "1017184172373",
-  appId: "1:1017184172373:web:769fd888b0dc9b25eb57dc",
-  measurementId: "G-FHPVZC9L19"
-};
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-  
-      document.getElementById('registrationForm').addEventListener('submit', async (event) => {
+      const formTitle = document.getElementById('formTitle');
+      const authForm = document.getElementById('authForm');
+      const authButton = document.getElementById('authButton');
+      const toggleForm = document.getElementById('toggleForm');
+      const toggleLink = document.getElementById('toggleLink');
+      const loadingIndicator = document.getElementById('loading');
+
+      let isSignIn = true;
+
+      toggleLink.addEventListener('click', () => {
+        if (isSignIn) {
+          formTitle.textContent = 'Register';
+          authButton.textContent = 'Register';
+          toggleForm.innerHTML = 'Already have an account? <a href="#" id="toggleLink">Sign in here</a>';
+        } else {
+          formTitle.textContent = 'Sign In';
+          authButton.textContent = 'Sign In';
+          toggleForm.innerHTML = "Don't have an account? <a href="#" id="toggleLink">Register here</a>";
+        }
+        isSignIn = !isSignIn;
+      });
+
+      authForm.addEventListener('submit', async (event) => {
           event.preventDefault();
   
           const email = document.getElementById('email').value;
           const password = document.getElementById('password').value;
-          const loadingIndicator = document.getElementById('loading');
   
           try {
               loadingIndicator.style.display = 'block';
   
-              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-              const user = userCredential.user;
+              if (isSignIn) {
+                  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                  const user = userCredential.user;
   
-              // Store registration data in localStorage
-              const registrations = JSON.parse(localStorage.getItem('branch_registrations')) || [];
-              registrations.push({ email, password });
-              localStorage.setItem('branch_registrations', JSON.stringify(registrations));
+                  // Store branch email in localStorage
+                  localStorage.setItem('branch_email', email);
   
-              alert('Registration successful!');
-              window.location.href = 'signin.html';
+                  alert('Sign-in successful!');
+                  window.location.href = 'index.html';
+              } else {
+                  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                  const user = userCredential.user;
+  
+                  alert('Registration successful! Redirecting to sign-in page.');
+                  window.location.href = 'signin.html';
+              }
   
           } catch (error) {
-              console.error('Error registering:', error);
-              alert('Error registering: ' + error.message);
+              console.error('Error:', error);
+              if (isSignIn && error.code === 'auth/user-not-found') {
+                  alert('User not found. Redirecting to registration page.');
+                  toggleLink.click();
+              } else {
+                  alert('Error: ' + error.message);
+              }
           } finally {
               loadingIndicator.style.display = 'none';
           }
