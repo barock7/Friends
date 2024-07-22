@@ -6,8 +6,8 @@
     <title>Branch Registration</title>
     <link rel="stylesheet" href="registration.css">
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -25,69 +25,61 @@
             <button type="submit">Register</button>
         </form>
         <div id="loading" class="loading-indicator" style="display: none;">Loading...</div>
+        <div id="message" class="message"></div>
     </div>
     
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-        // Import the necessary Firebase functions
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBRW2r6gW8ah6DkbME0FzLfUv6kCzloO8U",
-  authDomain: "friendsbingo-d17f7.firebaseapp.com",
-  projectId: "friendsbingo-d17f7",
-  storageBucket: "friendsbingo-d17f7.appspot.com",
-  messagingSenderId: "1028940353502",
-  appId: "1:1028940353502:web:f7cc1615e2cf21bd60174f",
-  measurementId: "G-QTYPTTNWER"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Handle form submission
-document.getElementById('registrationForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-
-  const branchName = document.getElementById('branchName').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const loadingIndicator = document.getElementById('loading');
-
-  try {
-    // Show loading indicator
-    loadingIndicator.style.display = 'block';
-
-    // Create user with email and password
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // Save additional user info in Firestore
-    await setDoc(doc(db, 'branches', user.uid), {
-      branchName: branchName,
-      email: email
-    });
-
-    console.log('User registered and branch info saved:', user.uid);
-    alert('Branch registered successfully!');
-
-    // Redirect to the sign-in page
-    window.location.href = 'signin.html';
-
-  } catch (error) {
-    console.error('Error registering user:', error);
-    alert('Error registering branch: ' + error.message);
-  } finally {
-    // Hide loading indicator
-    loadingIndicator.style.display = 'none';
-  }
-});
-
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+      import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+  
+      const firebaseConfig = {
+          apiKey: "AIzaSyBRW2r6gW8ah6DkbME0FzLfUv6kCzloO8U",
+          authDomain: "friendsbingo-d17f7.firebaseapp.com",
+          projectId: "friendsbingo-d17f7",
+          storageBucket: "friendsbingo-d17f7.appspot.com",
+          messagingSenderId: "1028940353502",
+          appId: "1:1028940353502:web:f7cc1615e2cf21bd60174f",
+          measurementId: "G-QTYPTTNWER"
+      };
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+  
+        document.getElementById('registrationForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+  
+            const branchName = document.getElementById('branchName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loadingIndicator = document.getElementById('loading');
+            const messageElement = document.getElementById('message');
+  
+            try {
+                loadingIndicator.style.display = 'block';
+                messageElement.textContent = '';
+  
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+  
+                // Save registration data in Firestore
+                await setDoc(doc(db, "branch_registrations", user.uid), {
+                    branchName,
+                    email,
+                    password
+                });
+  
+                alert('Registration successful!');
+                window.location.href = 'signin.html';
+  
+            } catch (error) {
+                console.error('Error registering:', error);
+                messageElement.textContent = 'Error registering: ' + error.message;
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
