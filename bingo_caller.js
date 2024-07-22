@@ -32,24 +32,6 @@ function playRecordedAudio(letter, number) {
         console.error(`Error playing number audio: ${e}`);
     });
 }
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBRW2r6gW8ah6DkbME0FzLfUv6kCzloO8U",
-    authDomain: "friendsbingo-d17f7.firebaseapp.com",
-    projectId: "friendsbingo-d17f7",
-    storageBucket: "friendsbingo-d17f7.appspot.com",
-    messagingSenderId: "1028940353502",
-    appId: "1:1028940353502:web:f7cc1615e2cf21bd60174f",
-    measurementId: "G-QTYPTTNWER"
-};
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-
 document.addEventListener('DOMContentLoaded', () => {
     const intervalSelect = document.getElementById('interval-select');
     const callNumberButton = document.getElementById('call-number-button');
