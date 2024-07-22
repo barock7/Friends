@@ -5,22 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-        .table {
-            margin-bottom: 20px;
-        }
-        .modal-body {
-            background-color: white;
-        }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -29,9 +15,9 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th>Branch Name</th>
                     <th>Email</th>
                     <th>Password</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="branch-registrations">
@@ -58,65 +44,82 @@
         <button id="clear-history" class="btn btn-danger">Clear All Game History</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRW2r6gW8ah6DkbME0FzLfUv6kCzloO8U",
+            authDomain: "friendsbingo-d17f7.firebaseapp.com",
+            projectId: "friendsbingo-d17f7",
+            storageBucket: "friendsbingo-d17f7.appspot.com",
+            messagingSenderId: "1028940353502",
+            appId: "1:1028940353502:web:f7cc1615e2cf21bd60174f",
+            measurementId: "G-QTYPTTNWER"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        
+        document.addEventListener('DOMContentLoaded', async () => {
             const branchRegistrations = document.getElementById('branch-registrations');
             const gameHistory = document.getElementById('game-history');
             const clearRegistrationsButton = document.getElementById('clear-registrations');
             const clearHistoryButton = document.getElementById('clear-history');
 
-            function loadBranchRegistrations() {
-                const registrations = JSON.parse(localStorage.getItem('branch_registrations')) || [];
+            async function loadBranchRegistrations() {
+                const querySnapshot = await getDocs(collection(db, "branch_registrations"));
                 branchRegistrations.innerHTML = '';
-                registrations.forEach((reg, index) => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${reg.email}</td>
-                        <td>${reg.password}</td>
-                        <td>
-                            <button class="btn btn-danger" onclick="deleteRegistration(${index})">Delete</button>
-                        </td>
+                        <td>${data.branchName}</td>
+                        <td>${data.email}</td>
+                        <td>${data.password}</td>
                     `;
                     branchRegistrations.appendChild(row);
                 });
             }
 
-            function loadGameHistory() {
-                const history = JSON.parse(localStorage.getItem('bet_history')) || [];
+            async function loadGameHistory() {
+                const querySnapshot = await getDocs(collection(db, "bet_history"));
                 gameHistory.innerHTML = '';
-                history.forEach(record => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${record.date}</td>
-                        <td>${record.amount}</td>
-                        <td>${record.totalCalls}</td>
-                        <td>${record.totalPlayers}</td>
-                        <td>${record.profit}</td>
+                        <td>${data.date}</td>
+                        <td>${data.amount}</td>
+                        <td>${data.totalCalls}</td>
+                        <td>${data.totalPlayers}</td>
+                        <td>${data.profit}</td>
                     `;
                     gameHistory.appendChild(row);
                 });
             }
 
-            clearRegistrationsButton.addEventListener('click', () => {
-                localStorage.removeItem('branch_registrations');
+            clearRegistrationsButton.addEventListener('click', async () => {
+                const querySnapshot = await getDocs(collection(db, "branch_registrations"));
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
                 loadBranchRegistrations();
             });
 
-            clearHistoryButton.addEventListener('click', () => {
-                localStorage.removeItem('bet_history');
+            clearHistoryButton.addEventListener('click', async () => {
+                const querySnapshot = await getDocs(collection(db, "bet_history"));
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
                 loadGameHistory();
             });
 
             loadBranchRegistrations();
             loadGameHistory();
         });
-
-        function deleteRegistration(index) {
-            const registrations = JSON.parse(localStorage.getItem('branch_registrations')) || [];
-            registrations.splice(index, 1);
-            localStorage.setItem('branch_registrations', JSON.stringify(registrations));
-            document.dispatchEvent(new Event('DOMContentLoaded'));
-        }
     </script>
 </body>
 </html>
