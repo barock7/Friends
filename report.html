@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Report</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Report</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Total Players</th>
+                    <th>Total Calls</th>
+                    <th>Total Bet Amount</th>
+                    <th>Profit</th>
+                </tr>
+            </thead>
+            <tbody id="report-table">
+                <!-- Game history will be populated here -->
+            </tbody>
+        </table>
+        <button id="clear-history" class="btn btn-danger">Clear All History</button>
+    </div>
+
+    <script type="module">
+       // Import the necessary Firebase functions
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBRW2r6gW8ah6DkbME0FzLfUv6kCzloO8U",
+  authDomain: "friendsbingo-d17f7.firebaseapp.com",
+  projectId: "friendsbingo-d17f7",
+  storageBucket: "friendsbingo-d17f7.appspot.com",
+  messagingSenderId: "1028940353502",
+  appId: "1:1028940353502:web:f7cc1615e2cf21bd60174f",
+  measurementId: "G-QTYPTTNWER"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+        document.addEventListener('DOMContentLoaded', async () => {
+            const reportTable = document.getElementById('report-table');
+            const clearHistoryButton = document.getElementById('clear-history');
+
+            async function loadGameHistory() {
+                const querySnapshot = await getDocs(collection(db, "bet_history"));
+                reportTable.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${data.date}</td>
+                        <td>${data.totalPlayers}</td>
+                        <td>${data.totalCalls}</td>
+                        <td>${data.amount}</td>
+                        <td>${data.profit}</td>
+                    `;
+                    reportTable.appendChild(row);
+                });
+            }
+
+            clearHistoryButton.addEventListener('click', async () => {
+                const querySnapshot = await getDocs(collection(db, "bet_history"));
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+                loadGameHistory();
+            });
+
+            loadGameHistory();
+        });
+    </script>
+</body>
+</html>

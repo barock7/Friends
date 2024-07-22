@@ -1,3 +1,21 @@
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRW2r6gW8ah6DkbME0FzLfUv6kCzloO8U",
+            authDomain: "friendsbingo-d17f7.firebaseapp.com",
+            projectId: "friendsbingo-d17f7",
+            storageBucket: "friendsbingo-d17f7.appspot.com",
+            messagingSenderId: "1028940353502",
+            appId: "1:1028940353502:web:f7cc1615e2cf21bd60174f",
+            measurementId: "G-QTYPTTNWER"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+
 function playRecordedAudio(letter, number) {
     // Base URL for the audio files on your GitHub repository
     const baseURL = 'https://raw.githubusercontent.com/barock7/Friends/main/audio-clips/';
@@ -307,16 +325,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalBetAmount = selectedIndices.length * parseFloat(betAmount);
             const profit = totalBetAmount * 0.2; // 20% profit
     
-            let betHistory = JSON.parse(localStorage.getItem('bet_history')) || [];
-            betHistory.push({
+            // Save to Firestore
+            addDoc(collection(db, "bet_history"), {
                 branchEmail,
                 date: currentDate,
                 amount: totalBetAmount.toFixed(2),
                 totalCalls,
                 totalPlayers: selectedIndices.length,
                 profit: profit.toFixed(2)
+            }).then(() => {
+                console.log("Bet history recorded successfully!");
+            }).catch((error) => {
+                console.error("Error recording bet history: ", error);
             });
-            localStorage.setItem('bet_history', JSON.stringify(betHistory));
         }
     }
     
