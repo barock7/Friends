@@ -1,42 +1,32 @@
 <?php
-include 'db_connection.php';
+$servername = "localhost";
+$username = "root";
+$password = "@eyoelbarockfitsum2024"; // Replace with your MySQL password
+$dbname = "friends1_db";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form data
-    $username = $_POST['username'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Encrypt the password
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-    // Prepare SQL statement
-    $stmt = $conn->prepare("INSERT INTO admins (username, password) VALUES (?, ?)");
-    $stmt->bind_param("ss", $username, $password);
-
-    // Execute the statement
-    if ($stmt->execute()) {
-        echo "New admin registered successfully";
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-
-    // Close the statement and connection
-    $stmt->close();
-    $conn->close();
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Registration</title>
-</head>
-<body>
-    <h2>Admin Registration</h2>
-    <form method="POST" action="register.php">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        <button type="submit">Register</button>
-    </form>
-</body>
-</html>
+// Get the POST data
+$postData = json_decode(file_get_contents('php://input'), true);
+$email = $conn->real_escape_string($postData['email']);
+$password = password_hash($conn->real_escape_string($postData['password']), PASSWORD_DEFAULT);
+
+// Insert the data into the database
+$sql = "INSERT INTO friends (email, password) VALUES ('$email', '$password')";
+
+if ($conn->query($sql) === TRUE) {
+    http_response_code(200);
+    echo json_encode(["message" => "User registered successfully"]);
+} else {
+    http_response_code(500);
+    echo json_encode(["message" => "Error: " . $conn->error]);
+}
+
+$conn->close();
+?>
