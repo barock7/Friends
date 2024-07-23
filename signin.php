@@ -1,39 +1,22 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "your_password"; // Replace with your MySQL password
-$dbname = "friends_db";
+// Assuming you have set up your database connection
+include 'db_connection.php';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+header('Content-Type: application/json');
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$data = json_decode(file_get_contents('php://input'), true);
+$email = $data['email'];
+$password = $data['password'];
 
-// Get the POST data
-$postData = json_decode(file_get_contents('php://input'), true);
-$email = $conn->real_escape_string($postData['email']);
-$password = $conn->real_escape_string($postData['password']);
-
-// Retrieve the user data from the database
-$sql = "SELECT * FROM friends WHERE email = '$email'";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    $user = $result->fetch_assoc();
-    if (password_verify($password, $user['password'])) {
-        http_response_code(200);
-        echo json_encode(["message" => "Sign-in successful"]);
-    } else {
-        http_response_code(401);
-        echo json_encode(["message" => "Invalid password"]);
-    }
+// Process the login logic here
+// Example:
+if ($email == 'test@example.com' && $password == 'password') {
+    // On successful sign-in
+    http_response_code(200);
+    echo json_encode(["message" => "Sign-in successful"]);
 } else {
-    http_response_code(404);
-    echo json_encode(["message" => "User not found"]);
+    // On failure
+    http_response_code(401);
+    echo json_encode(["message" => "Invalid credentials"]);
 }
-
-$conn->close();
 ?>
