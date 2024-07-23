@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h2>Register</h2>
-        <form id="registrationForm" method="post" action="register.php">
+        <form id="registrationForm" method="post">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
 
@@ -21,10 +21,36 @@
         <div id="loading" class="loading-indicator" style="display: none;">Loading...</div>
     </div>
     <script>
-      document.getElementById('registrationForm').addEventListener('submit', function(event) {
-          const loadingIndicator = document.getElementById('loading');
-          loadingIndicator.style.display = 'block';
-      });
+        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const loadingIndicator = document.getElementById('loading');
+            loadingIndicator.style.display = 'block';
+
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Registration successful! Redirecting to sign-in page.');
+                    window.location.href = 'signin.html';
+                } else {
+                    const errorData = await response.json();
+                    alert('Error registering: ' + errorData.message);
+                }
+            } catch (error) {
+                alert('Error registering: ' + error.message);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
